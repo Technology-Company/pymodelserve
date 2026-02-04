@@ -1,0 +1,85 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pymodelserve"
+version = "0.1.0"
+description = "Run ML models in isolated subprocess environments with automatic dependency management"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    { name = "Johanna", email = "johanna@example.com" }
+]
+keywords = [
+    "machine-learning",
+    "model-serving",
+    "subprocess",
+    "ipc",
+    "tensorflow",
+    "pytorch",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+    "click>=8.0",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+django = [
+    "django>=4.2",
+]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+]
+all = [
+    "pymodelserve[django,dev]",
+]
+
+[project.scripts]
+pml = "pymodelserve.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/johanna/pymodelserve"
+Documentation = "https://github.com/johanna/pymodelserve#readme"
+Repository = "https://github.com/johanna/pymodelserve"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pymodelserve"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
