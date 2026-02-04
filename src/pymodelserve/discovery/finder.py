@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from pymodelserve.config.loader import find_config, load_config
 from pymodelserve.config.schema import ModelConfig
@@ -51,9 +52,7 @@ def discover_models(
             try:
                 config = load_config(config_path, model_dir=dir_path)
                 if config.name in models:
-                    logger.warning(
-                        f"Duplicate model name '{config.name}' found at {dir_path}"
-                    )
+                    logger.warning(f"Duplicate model name '{config.name}' found at {dir_path}")
                 else:
                     models[config.name] = config
                     logger.debug(f"Discovered model '{config.name}' at {dir_path}")

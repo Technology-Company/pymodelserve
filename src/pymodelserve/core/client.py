@@ -6,8 +6,9 @@ import logging
 import os
 import sys
 import traceback
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from pymodelserve.core.ipc import NamedPipeClient
 
@@ -35,13 +36,13 @@ def handler(name: str) -> Callable[[F], F]:
 
     def decorator(func: F) -> F:
         # Store handler name as function attribute
-        setattr(func, "_handler_name", name)
+        func._handler_name = name
 
         @wraps(func)
         def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
             return func(self, *args, **kwargs)
 
-        setattr(wrapper, "_handler_name", name)
+        wrapper._handler_name = name
         return wrapper  # type: ignore
 
     return decorator
@@ -207,7 +208,7 @@ class ModelClient:
 
                 self._ipc.send(response)
 
-        except Exception as e:
+        except Exception:
             logger.exception("Model client error")
             sys.exit(1)
         finally:

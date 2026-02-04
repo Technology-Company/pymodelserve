@@ -1,9 +1,6 @@
 """Tests for ModelClient."""
 
-import pytest
-from unittest.mock import MagicMock, patch
-
-from pymodelserve.core.client import ModelClient, handler, run_client
+from pymodelserve.core.client import ModelClient, handler
 
 
 class TestHandlerDecorator:

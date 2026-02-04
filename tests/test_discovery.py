@@ -1,14 +1,15 @@
 """Tests for model discovery and registry."""
 
-import pytest
 from pathlib import Path
 
+import pytest
+
+from pymodelserve.config.schema import ClientConfig, ModelConfig
 from pymodelserve.discovery.finder import (
-    discover_models,
-    ModelRegistry,
     DiscoveryError,
+    ModelRegistry,
+    discover_models,
 )
-from pymodelserve.config.schema import ModelConfig, ClientConfig
 
 
 class TestDiscoverModels:

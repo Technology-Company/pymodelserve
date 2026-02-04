@@ -1,11 +1,12 @@
 """Tests for configuration loading."""
 
-import pytest
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
-from pymodelserve.config.schema import ModelConfig, ClientConfig, HandlerConfig
-from pymodelserve.config.loader import load_config, load_yaml, ConfigError
+import pytest
+
+from pymodelserve.config.loader import ConfigError, load_config
+from pymodelserve.config.schema import ClientConfig, HandlerConfig, ModelConfig
 
 
 class TestModelConfig:
@@ -30,9 +31,7 @@ class TestModelConfig:
             python=">=3.11",
             client=ClientConfig(module="my_model", class_name="MyClient"),
             requirements="deps.txt",
-            handlers=[
-                HandlerConfig(name="predict", input={"x": "float"}, output={"y": "float"})
-            ],
+            handlers=[HandlerConfig(name="predict", input={"x": "float"}, output={"y": "float"})],
         )
         assert config.name == "full_model"
         assert config.version == "2.0.0"

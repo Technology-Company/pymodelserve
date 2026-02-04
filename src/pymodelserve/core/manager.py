@@ -12,8 +12,8 @@ from typing import Any
 
 from pymodelserve.config.loader import load_config, load_config_from_dir
 from pymodelserve.config.schema import ModelConfig
-from pymodelserve.core.ipc import IPCError, NamedPipeServer, PipeConfig
-from pymodelserve.core.venv import VenvManager, ensure_venv
+from pymodelserve.core.ipc import IPCError, NamedPipeServer
+from pymodelserve.core.venv import VenvManager
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,9 @@ class ModelManager:
         return cls(config, **kwargs)
 
     @classmethod
-    def from_config(cls, config_dict: dict[str, Any], model_dir: str | Path, **kwargs: Any) -> ModelManager:
+    def from_config(
+        cls, config_dict: dict[str, Any], model_dir: str | Path, **kwargs: Any
+    ) -> ModelManager:
         """Create ModelManager from a config dictionary.
 
         Args:
@@ -136,11 +138,7 @@ class ModelManager:
     @property
     def is_running(self) -> bool:
         """Check if the model process is running."""
-        return (
-            self._is_started
-            and self._process is not None
-            and self._process.poll() is None
-        )
+        return self._is_started and self._process is not None and self._process.poll() is None
 
     def setup_venv(self, force: bool = False) -> VenvManager:
         """Set up virtual environment and install dependencies.
@@ -188,9 +186,7 @@ class ModelManager:
             self._venv = VenvManager(self.model_dir)
 
         if not self._venv.exists:
-            raise ModelStartupError(
-                f"Virtual environment not found. Call setup_venv() first."
-            )
+            raise ModelStartupError("Virtual environment not found. Call setup_venv() first.")
 
         # Setup IPC
         self._ipc = NamedPipeServer()
@@ -202,9 +198,7 @@ class ModelManager:
 
         # GPU configuration if specified
         if self.config.resources.gpu_ids is not None:
-            env["CUDA_VISIBLE_DEVICES"] = ",".join(
-                str(i) for i in self.config.resources.gpu_ids
-            )
+            env["CUDA_VISIBLE_DEVICES"] = ",".join(str(i) for i in self.config.resources.gpu_ids)
 
         # Start subprocess
         client_module = self.config.client.module
@@ -329,9 +323,7 @@ class ModelManager:
 
         if not self.is_running:
             stderr = "\n".join(self._stderr_output[-20:])
-            raise ModelRequestError(
-                f"Model process died unexpectedly.\nLast stderr:\n{stderr}"
-            )
+            raise ModelRequestError(f"Model process died unexpectedly.\nLast stderr:\n{stderr}")
 
         if self._ipc is None:
             raise ModelNotStartedError("IPC not initialized")

@@ -5,9 +5,10 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from dataclasses import dataclass, field
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from pymodelserve.core.manager import ModelManager
@@ -173,10 +174,7 @@ class HealthChecker:
                         logger.error(f"Error in on_failure callback: {e}")
 
                 # Handle restart
-                if (
-                    self.auto_restart
-                    and status.consecutive_failures >= self.max_failures
-                ):
+                if self.auto_restart and status.consecutive_failures >= self.max_failures:
                     self._restart_model(name, manager)
 
         return self._status.copy()
@@ -226,8 +224,7 @@ class HealthChecker:
             return
 
         logger.info(
-            f"Starting health checker (interval={self.interval}s, "
-            f"max_failures={self.max_failures})"
+            f"Starting health checker (interval={self.interval}s, max_failures={self.max_failures})"
         )
 
         self._running = True

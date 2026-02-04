@@ -1,7 +1,8 @@
 """Tests for CLI commands."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 from click.testing import CliRunner
 
 from pymodelserve.cli.commands import main

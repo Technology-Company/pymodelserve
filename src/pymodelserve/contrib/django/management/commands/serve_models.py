@@ -10,7 +10,7 @@ from typing import Any
 from django.core.management.base import BaseCommand, CommandError
 
 from pymodelserve.contrib.django.registry import get_registry, shutdown_models
-from pymodelserve.contrib.django.settings import get_models_dir, get_health_check_interval
+from pymodelserve.contrib.django.settings import get_health_check_interval, get_models_dir
 from pymodelserve.discovery.finder import discover_models
 from pymodelserve.health.checker import HealthChecker
 
@@ -134,8 +134,7 @@ class Command(BaseCommand):
         """Called when a model fails health check."""
         self.stdout.write(
             self.style.WARNING(
-                f"Health check failed for '{name}' "
-                f"({status.consecutive_failures} failures)"
+                f"Health check failed for '{name}' ({status.consecutive_failures} failures)"
             )
         )
 
@@ -154,8 +153,6 @@ class Command(BaseCommand):
             running = "Running" if info["running"] else "Stopped"
             handlers = ", ".join(info["handlers"]) or "(none)"
             style = self.style.SUCCESS if info["running"] else self.style.ERROR
-            self.stdout.write(
-                f"  {name}: {style(running)} | v{info['version']} | {handlers}"
-            )
+            self.stdout.write(f"  {name}: {style(running)} | v{info['version']} | {handlers}")
 
         self.stdout.write("-" * 60)

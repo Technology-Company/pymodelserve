@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import os
-import stat
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -86,7 +85,7 @@ class NamedPipeServer:
         # Open pipe_out for reading (to receive messages from client)
         # Note: These will block until the client opens the other ends
         self._pipe_in = open(self.config.pipe_in_path, "w")
-        self._pipe_out = open(self.config.pipe_out_path, "r")
+        self._pipe_out = open(self.config.pipe_out_path)
         self._is_connected = True
 
     def send(self, message: dict[str, Any]) -> None:
@@ -169,7 +168,7 @@ class NamedPipeClient:
         """Open pipes for communication."""
         # Open pipe_in for reading (to receive messages from server)
         # Open pipe_out for writing (to send messages to server)
-        self._pipe_in = open(self.config.pipe_in_path, "r")
+        self._pipe_in = open(self.config.pipe_in_path)
         self._pipe_out = open(self.config.pipe_out_path, "w")
         self._is_connected = True
 

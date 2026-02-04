@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pymodelserve.discovery.finder import ModelRegistry
     from pymodelserve.core.manager import ModelManager
+    from pymodelserve.discovery.finder import ModelRegistry
 
 # Global registry instance
 _registry: ModelRegistry | None = None

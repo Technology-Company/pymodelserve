@@ -1,14 +1,15 @@
 """Tests for health monitoring."""
 
-import pytest
 import time
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
+import pytest
 
 from pymodelserve.health.checker import (
     HealthChecker,
-    HealthStatus,
     HealthCheckResult,
+    HealthStatus,
 )
 
 

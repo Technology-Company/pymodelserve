@@ -64,14 +64,10 @@ class ModelConfig(BaseModel):
     client: ClientConfig = Field(description="Client entry point configuration")
     requirements: str = Field(default="requirements.txt", description="Requirements file path")
 
-    handlers: list[HandlerConfig] = Field(
-        default_factory=list, description="Available handlers"
-    )
+    handlers: list[HandlerConfig] = Field(default_factory=list, description="Available handlers")
 
     health: HealthConfig = Field(default_factory=HealthConfig, description="Health check config")
-    resources: ResourceConfig = Field(
-        default_factory=ResourceConfig, description="Resource limits"
-    )
+    resources: ResourceConfig = Field(default_factory=ResourceConfig, description="Resource limits")
 
     # Internal field set after loading
     model_dir: Path | None = Field(default=None, exclude=True)

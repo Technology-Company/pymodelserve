@@ -209,7 +209,9 @@ def health(model_path: str, timeout: float) -> None:
 
 @main.command()
 @click.argument("name")
-@click.option("--framework", type=click.Choice(["tensorflow", "pytorch", "generic"]), default="generic")
+@click.option(
+    "--framework", type=click.Choice(["tensorflow", "pytorch", "generic"]), default="generic"
+)
 @click.option("--output", "-o", type=click.Path(), help="Output directory (default: ./NAME)")
 def init(name: str, framework: str, output: str | None) -> None:
     """Create a new model scaffold.
@@ -238,7 +240,7 @@ python: ">=3.11"
 
 client:
   module: model
-  class: {name.title().replace('_', '')}Client
+  class: {name.title().replace("_", "")}Client
 
 requirements: requirements.txt
 
@@ -377,7 +379,7 @@ if __name__ == "__main__":
     (output_dir / "weights" / ".gitkeep").write_text("")
 
     console.print(f"[green]✓ Created model scaffold at {output_dir}[/green]")
-    console.print(f"\nNext steps:")
+    console.print("\nNext steps:")
     console.print(f"  1. Add your model weights to {output_dir}/weights/")
     console.print(f"  2. Edit {output_dir}/model.py to load and use your model")
     console.print(f"  3. Run: pml serve {output_dir}")
@@ -405,17 +407,17 @@ def test(model_path: str) -> None:
 
         console.print("2. Setting up virtual environment...")
         manager.setup_venv()
-        console.print(f"   [green]✓[/green] Venv ready")
+        console.print("   [green]✓[/green] Venv ready")
 
         console.print("3. Starting model...")
         manager.start(timeout=60)
-        console.print(f"   [green]✓[/green] Model started")
+        console.print("   [green]✓[/green] Model started")
 
         console.print("4. Running health check...")
         if manager.ping():
-            console.print(f"   [green]✓[/green] Health check passed")
+            console.print("   [green]✓[/green] Health check passed")
         else:
-            console.print(f"   [red]✗[/red] Health check failed")
+            console.print("   [red]✗[/red] Health check failed")
             sys.exit(1)
 
         console.print("\n[green]All tests passed![/green]")
@@ -427,7 +429,7 @@ def test(model_path: str) -> None:
         if "manager" in locals():
             console.print("\n5. Stopping model...")
             manager.stop()
-            console.print(f"   [green]✓[/green] Stopped")
+            console.print("   [green]✓[/green] Stopped")
 
 
 def _print_status_table(registry: Any) -> None:

@@ -1,14 +1,13 @@
 """Tests for virtual environment management."""
 
 import subprocess
+
 import pytest
-from pathlib import Path
 
 from pymodelserve.core.venv import (
-    VenvManager,
-    VenvError,
-    VenvCreationError,
     DependencyInstallError,
+    VenvError,
+    VenvManager,
     ensure_venv,
 )
 
@@ -202,7 +201,7 @@ class TestEnsureVenv:
         marker = manager1.venv_dir / "marker.txt"
         marker.write_text("test")
 
-        # Should reuse
-        manager2 = ensure_venv(tmp_path)
+        # Should reuse (not recreate)
+        ensure_venv(tmp_path)
 
         assert marker.exists()  # Marker still there = venv was reused

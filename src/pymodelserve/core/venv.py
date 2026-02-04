@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import logging
 import subprocess
-import sys
 import venv
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 logger = logging.getLogger(__name__)
 

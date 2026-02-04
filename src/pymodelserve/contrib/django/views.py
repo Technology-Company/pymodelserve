@@ -179,7 +179,7 @@ class GenericModelView(View):
                 {"error": "Request failed", "detail": str(e)},
                 status=500,
             )
-        except Exception as e:
+        except Exception:
             logger.exception("Error in generic model view")
             return JsonResponse(
                 {"error": "Internal error"},

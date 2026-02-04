@@ -1,15 +1,13 @@
 """Tests for IPC module."""
 
-import pytest
 import threading
-import time
-from pathlib import Path
+
+import pytest
 
 from pymodelserve.core.ipc import (
-    NamedPipeServer,
     NamedPipeClient,
+    NamedPipeServer,
     PipeConfig,
-    IPCError,
     PipeNotConnectedError,
 )
 
