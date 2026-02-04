@@ -1,0 +1,27 @@
+name: simple_echo
+version: "1.0.0"
+python: ">=3.11"
+
+client:
+  module: model
+  class: EchoClient
+
+requirements: requirements.txt
+
+handlers:
+  - name: echo
+    input:
+      message: string
+    output:
+      echoed: string
+      timestamp: string
+
+  - name: uppercase
+    input:
+      text: string
+    output:
+      result: string
+
+health:
+  interval: 30
+  timeout: 5
