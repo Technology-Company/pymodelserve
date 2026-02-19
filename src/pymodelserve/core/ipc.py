@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Any
@@ -52,6 +53,7 @@ class NamedPipeServer:
         self._pipe_in: IO[str] | None = None
         self._pipe_out: IO[str] | None = None
         self._is_connected = False
+        self._lock = threading.Lock()
 
     @property
     def config(self) -> PipeConfig:
@@ -109,9 +111,13 @@ class NamedPipeServer:
         return json.loads(line)
 
     def request(self, message_type: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
-        """Send a request and wait for response."""
-        self.send({"message": message_type, "data": data or {}})
-        return self.receive()
+        """Send a request and wait for response.
+
+        Thread-safe: only one request can be in-flight at a time.
+        """
+        with self._lock:
+            self.send({"message": message_type, "data": data or {}})
+            return self.receive()
 
     def close(self) -> None:
         """Close pipes and cleanup."""

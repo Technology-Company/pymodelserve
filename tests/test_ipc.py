@@ -1,6 +1,8 @@
 """Tests for IPC module."""
 
 import threading
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pytest
 
@@ -154,3 +156,142 @@ class TestServerClientCommunication:
             thread.join(timeout=5)
         finally:
             server.close()
+
+
+class TestThreadSafety:
+    """Tests for thread-safe request/response on NamedPipeServer."""
+
+    def _make_echo_client(self, config):
+        """Create a client thread that echoes back requests with an id field."""
+
+        def client_thread():
+            client = NamedPipeClient(config.pipe_dir)
+            client.connect()
+
+            while True:
+                msg = client.receive()
+                if msg is None:
+                    break
+
+                message_type = msg.get("message")
+                data = msg.get("data", {})
+
+                if message_type == "shutdown":
+                    client.send({"status": "bye"})
+                    break
+                elif message_type == "echo":
+                    # Echo back the request id to prove ordering
+                    client.send({"id": data.get("id"), "thread": data.get("thread")})
+                elif message_type == "slow_echo":
+                    time.sleep(0.01)  # Simulate work
+                    client.send({"id": data.get("id"), "thread": data.get("thread")})
+
+            client.close()
+
+        return client_thread
+
+    def test_concurrent_requests_are_serialized(self):
+        """Multiple threads calling request() must not interleave pipe I/O.
+
+        Each response must match the request that was sent (same id),
+        proving the lock serializes send+receive pairs.
+        """
+        server = NamedPipeServer()
+        config = server.setup()
+
+        thread = threading.Thread(target=self._make_echo_client(config))
+        thread.start()
+
+        try:
+            server.connect()
+
+            num_threads = 8
+            requests_per_thread = 10
+            results = []  # list of (thread_id, request_id, response)
+            errors = []
+
+            def send_requests(thread_id):
+                thread_results = []
+                for i in range(requests_per_thread):
+                    request_id = thread_id * 1000 + i
+                    try:
+                        resp = server.request("echo", {"id": request_id, "thread": thread_id})
+                        thread_results.append((thread_id, request_id, resp))
+                    except Exception as e:
+                        errors.append((thread_id, request_id, e))
+                return thread_results
+
+            with ThreadPoolExecutor(max_workers=num_threads) as pool:
+                futures = [pool.submit(send_requests, t) for t in range(num_threads)]
+                for future in as_completed(futures):
+                    results.extend(future.result())
+
+            # Shutdown the echo client
+            server.request("shutdown")
+            thread.join(timeout=5)
+
+            # Verify no errors
+            assert len(errors) == 0, f"Got errors: {errors}"
+
+            # Verify we got all responses
+            assert len(results) == num_threads * requests_per_thread
+
+            # Verify each response matches its request (lock prevented interleaving)
+            for thread_id, request_id, resp in results:
+                assert resp["id"] == request_id, (
+                    f"Thread {thread_id} sent id={request_id} but got back id={resp['id']}. "
+                    "This indicates pipe I/O interleaving (missing lock)."
+                )
+                assert resp["thread"] == thread_id
+
+        finally:
+            server.close()
+
+    def test_concurrent_slow_requests(self):
+        """Concurrent requests with simulated model latency still serialize correctly."""
+        server = NamedPipeServer()
+        config = server.setup()
+
+        thread = threading.Thread(target=self._make_echo_client(config))
+        thread.start()
+
+        try:
+            server.connect()
+
+            num_threads = 4
+            results = []
+            errors = []
+
+            def send_slow_request(thread_id):
+                try:
+                    resp = server.request("slow_echo", {"id": thread_id, "thread": thread_id})
+                    return (thread_id, resp)
+                except Exception as e:
+                    errors.append((thread_id, e))
+                    return None
+
+            with ThreadPoolExecutor(max_workers=num_threads) as pool:
+                futures = [pool.submit(send_slow_request, t) for t in range(num_threads)]
+                for future in as_completed(futures):
+                    result = future.result()
+                    if result:
+                        results.append(result)
+
+            server.request("shutdown")
+            thread.join(timeout=5)
+
+            assert len(errors) == 0, f"Got errors: {errors}"
+            assert len(results) == num_threads
+
+            for thread_id, resp in results:
+                assert resp["id"] == thread_id
+                assert resp["thread"] == thread_id
+
+        finally:
+            server.close()
+
+    def test_lock_attribute_exists(self):
+        """NamedPipeServer must have a threading lock."""
+        server = NamedPipeServer()
+        assert hasattr(server, "_lock")
+        assert isinstance(server._lock, type(threading.Lock()))
