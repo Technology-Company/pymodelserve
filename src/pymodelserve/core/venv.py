@@ -132,7 +132,18 @@ class VenvManager:
 
     def _run_pip(self, args: list[str]) -> subprocess.CompletedProcess[str]:
         """Run a pip command in the virtual environment."""
+        import os
+
         cmd = [str(self.pip_path)] + args
+
+        # Build into a temp dir on the same filesystem as the venv. The default
+        # $TMPDIR (/tmp) is a small tmpfs on many hosts, which large wheels
+        # (e.g. torch) overflow with "No space left on device".
+        env = os.environ.copy()
+        if not env.get("TMPDIR"):
+            pip_tmp = self.venv_dir / ".pip-tmp"
+            pip_tmp.mkdir(parents=True, exist_ok=True)
+            env["TMPDIR"] = str(pip_tmp)
 
         try:
             result = subprocess.run(
@@ -141,6 +152,7 @@ class VenvManager:
                 text=True,
                 check=True,
                 cwd=self.model_dir,
+                env=env,
             )
             logger.debug(f"pip output: {result.stdout}")
             return result

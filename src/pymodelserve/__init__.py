@@ -12,7 +12,7 @@ from pymodelserve.core.client import ModelClient, handler, run_client
 from pymodelserve.core.manager import ModelManager
 from pymodelserve.discovery.finder import ModelRegistry, discover_models
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __all__ = [
     "ModelManager",
     "ModelClient",
